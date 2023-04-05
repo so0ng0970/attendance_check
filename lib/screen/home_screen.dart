@@ -20,6 +20,16 @@ class _HomeScreenState extends State<HomeScreen> {
     target: companyLatLng,
     zoom: 17,
   );
+  static double distance = 100;
+
+  static Circle circle = Circle(
+    circleId: const CircleId(''),
+    center: companyLatLng,
+    fillColor: Colors.blue.withOpacity(0.5),
+    radius: distance,
+    strokeColor: Colors.blue,
+    strokeWidth: 1,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +49,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
           if (snapshot.data == '위치 권한이 허가 되었습니다') {
             return Column(
-              children: const [
+              children: [
                 _CustomGoogleMap(
+                  circle: circle,
                   initialPosition: initialPosition,
                 ),
-                _ChoolCheckButton()
+                const _ChoolCheckButton()
               ],
             );
           }
@@ -105,10 +116,12 @@ class _ChoolCheckButton extends StatelessWidget {
 class _CustomGoogleMap extends StatelessWidget {
   const _CustomGoogleMap({
     Key? key,
+    required this.circle,
     required this.initialPosition,
   }) : super(key: key);
 
   final CameraPosition initialPosition;
+  final Circle circle;
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +130,9 @@ class _CustomGoogleMap extends StatelessWidget {
       child: GoogleMap(
         mapType: MapType.normal,
         initialCameraPosition: initialPosition,
+        myLocationEnabled: true,
+        myLocationButtonEnabled: false,
+        circles: {circle},
       ),
     );
   }
