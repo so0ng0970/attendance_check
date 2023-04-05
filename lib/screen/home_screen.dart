@@ -10,6 +10,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool choolCheckDone = false;
   // latitude-위도 , longitude - 경도
   static const LatLng companyLatLng = LatLng(
     37.569448,
@@ -98,12 +99,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       _CustomGoogleMap(
                         marker: marker,
-                        circle: isWithinRange
-                            ? withinDistanceCircle
-                            : notWithinDistanceCircle,
+                        circle: choolCheckDone
+                            ? checkDoneCircle
+                            : isWithinRange
+                                ? withinDistanceCircle
+                                : notWithinDistanceCircle,
                         initialPosition: initialPosition,
                       ),
-                      const _ChoolCheckButton()
+                      _ChoolCheckButton(
+                        onPressed: onChoolCheckButton,
+                        choolCheckDone: choolCheckDone,
+                        isWithinRange: isWithinRange,
+                      )
                     ],
                   );
                 });
@@ -116,6 +123,36 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  onChoolCheckButton() async {
+    final result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('출근하기'),
+          content: const Text('출근을 하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('출근하기'),
+            ),
+          ],
+        );
+      },
+    );
+    if (result) {
+      choolCheckDone = true;
+    }
+  }
+
+  isWithinRange() {}
   Future<String> checkPermission() async {
     final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
 
@@ -149,15 +186,41 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _ChoolCheckButton extends StatelessWidget {
+  final bool isWithinRange;
+  final VoidCallback onPressed;
+  final bool choolCheckDone;
+
   const _ChoolCheckButton({
+    required this.choolCheckDone,
+    required this.isWithinRange,
+    required this.onPressed,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Expanded(
-      child: Text(
-        '출근',
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.timelapse_outlined,
+            size: 50.0,
+            color: choolCheckDone
+                ? Colors.green
+                : isWithinRange
+                    ? Colors.blue
+                    : Colors.red,
+          ),
+          const SizedBox(
+            height: 20.0,
+          ),
+          if (!choolCheckDone && isWithinRange)
+            TextButton(
+              onPressed: onPressed,
+              child: const Text('출근하기'),
+            )
+        ],
       ),
     );
   }
