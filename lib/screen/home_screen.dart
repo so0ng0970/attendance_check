@@ -63,11 +63,12 @@ class _HomeScreenState extends State<HomeScreen> {
         future: checkPermission(),
         // initialData: InitialData,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (!snapshot.hasData) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
+
           print(snapshot
               .connectionState); // connectionState - waiting future 로딩중일때 , 끝이면 done이 뜸
 
